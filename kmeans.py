@@ -1,5 +1,6 @@
 # Henry Swaffield & Hans Goudey - CS451 - Fall 2017
 
+import csv
 import numpy as np
 
 # lists, with an entry for each training example:
@@ -16,13 +17,24 @@ def read_csv():
         for row in countryReader:
             data.append(np.array(row))
         print(data[1])
-        print(data.shape)
+        print(data)
 
 def squared_distance(v1, v2):
     output = 0
     for i in range(len(v1)):
         output += v1[i] * v2[i]
     return output
+
+def get_centroid(country, centroids):
+    # initializing with a value to the nearest centroid.
+    min_distance = squared_distance(country, centroids[0])
+    nearest = 0
+    for centroid in range(len(centroids)):
+        distance = squared_distance(country, centroids[centroid])
+        if min_distance > distance:
+            min_distance = distance
+            nearest = centroid
+    return nearest
     
 
 def main():
