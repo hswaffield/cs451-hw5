@@ -36,6 +36,11 @@ def get_centroid(country, centroids):
             nearest = centroid
     return nearest
     
+def find_centroid(x, mu):
+    distances = [squared_distance(x[i], mu[i]) for i in range(len(x))]
+    smallest_distance = distances.index(min(distances))
+    
+    return smallest_distance
 
 def main():
     read_csv()
