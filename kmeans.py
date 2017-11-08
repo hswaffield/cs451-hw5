@@ -24,6 +24,11 @@ def squared_distance(v1, v2):
         output += v1[i] * v2[i]
     return output
     
+def find_centroid(x, mu):
+    distances = [squared_distance(x[i], mu[i]) for i in range(len(x))]
+    smallest_distance = distances.index(min(distances))
+    
+    return smallest_distance
 
 def main():
     read_csv()
