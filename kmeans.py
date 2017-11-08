@@ -25,16 +25,16 @@ def squared_distance(v1, v2):
         output += v1[i] * v2[i]
     return output
 
-def get_centroid(country, centroids):
-    # initializing with a value to the nearest centroid.
-    min_distance = squared_distance(country, centroids[0])
-    nearest = 0
-    for centroid in range(len(centroids)):
-        distance = squared_distance(country, centroids[centroid])
-        if min_distance > distance:
-            min_distance = distance
-            nearest = centroid
-    return nearest
+# def get_centroid(country, centroids):
+#     # initializing with a value to the nearest centroid.
+#     min_distance = squared_distance(country, centroids[0])
+#     nearest = 0
+#     for centroid in range(len(centroids)):
+#         distance = squared_distance(country, centroids[centroid])
+#         if min_distance > distance:
+#             min_distance = distance
+#             nearest = centroid
+#     return nearest
     
 def find_centroid(x, mu):
     distances = [squared_distance(x[i], mu[i]) for i in range(len(x))]
