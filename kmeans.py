@@ -9,11 +9,14 @@ import numpy as np
 # mu[k] - 16d vector, which countries correspond to the cluster, K
 
 def read_csv():
-    countryReader = csv.reader(csvfile, delimiter=',', quotechar='|')
-    for row in countryReader:
-        data.append(np.array(row))
-    print(data[1])
-    print(data.shape)
+    
+    data = []
+    with open('country.csv') as csvfile:
+        countryReader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for row in countryReader:
+            data.append(np.array(row))
+        print(data[1])
+        print(data.shape)
 
 def squared_distance(v1, v2):
     output = 0
