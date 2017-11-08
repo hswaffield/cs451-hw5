@@ -11,13 +11,13 @@ import numpy as np
 
 def read_csv():
     
-    data = []
+    x = []
     with open('country.csv') as csvfile:
         countryReader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for row in countryReader:
-            data.append(np.array(row))
-        print(data[1])
-        print(data)
+            x.append(np.array(row))
+        print(x[1])
+        print(x)
 
 def squared_distance(v1, v2):
     output = 0
@@ -36,11 +36,18 @@ def squared_distance(v1, v2):
 #             nearest = centroid
 #     return nearest
     
-def find_centroid(x, mu):
-    distances = [squared_distance(x[i], mu[i]) for i in range(len(x))]
+def find_nearest_centroid(xi, mu):
+    distances = [squared_distance(xi[i], mu[i]) for i in range(len(xi))]
     smallest_distance = distances.index(min(distances))
     
     return smallest_distance
+
+
+def get_centroids(x, mu):
+    return [find_nearest_centroid(x[i], mu) for i in range(len(x))]
+
+def compute_cost(x, c, mu):
+    return np.mean([squared_distance(x[i], mu[c[i]]) for i in range(len(x))])
 
 def main():
     read_csv()
