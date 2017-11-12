@@ -9,48 +9,64 @@ import numpy as np
 
 # mu[k] - 16d vector, which countries correspond to the cluster, K
 
-def read_csv():
-    
+def read_csv(filename):
     x = []
-    with open('country.csv') as csvfile:
-        countryReader = csv.reader(csvfile, delimiter=',', quotechar='|')
-        for row in countryReader:
+    with open(filename) as csvfile:
+        country_reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        next(country_reader, None)
+        for row in country_reader:
+            row = [float(row[i]) for i in range(1, len(row))]
             x.append(np.array(row))
-        print(x[1])
-        print(x)
+    return x
 
 def squared_distance(v1, v2):
+    #assert (len(v1) != len(v2)), "Vectors are not the same length"
     output = 0
     for i in range(len(v1)):
         output += v1[i] * v2[i]
     return output
-
-# def get_centroid(country, centroids):
-#     # initializing with a value to the nearest centroid.
-#     min_distance = squared_distance(country, centroids[0])
-#     nearest = 0
-#     for centroid in range(len(centroids)):
-#         distance = squared_distance(country, centroids[centroid])
-#         if min_distance > distance:
-#             min_distance = distance
-#             nearest = centroid
-#     return nearest
     
 def find_nearest_centroid(xi, mu):
-    distances = [squared_distance(xi[i], mu[i]) for i in range(len(xi))]
-    smallest_distance = distances.index(min(distances))
-    
-    return smallest_distance
-
+    distances = [squared_distance(xi, mu[i]) for i in range(len(mu))]
+    return distances.index(min(distances))
 
 def get_centroids(x, mu):
     return [find_nearest_centroid(x[i], mu) for i in range(len(x))]
 
-def compute_cost(x, c, mu):
+def cost(x, c, mu):
     return np.mean([squared_distance(x[i], mu[c[i]]) for i in range(len(x))])
 
+
+def kmeans(x, k):
+    print('X:', x)
+    mu = x[:k]
+    print('MU: ', mu)
+    lastCost = cost(x, get_centroids(x, mu), mu)
+    for i in range(0, 500):
+        # Cluster Assignment
+        c = get_centroids(x, mu)
+
+        # Update Centroids
+        for i in range(len(mu)):
+            # New mu[i] is the average of all of the data points assigned to it
+            data_assigned_to_centroid = []
+            for index in c:
+                if index == i:
+                    data_assigned_to_centroid.append(x[index])
+            data_assigned_to_centroid = zip(data_assigned_to_centroid)
+            mu = np.array([np.mean(x) for x in data_assigned_to_centroid])
+
+        # Print Cost
+        thisCost = cost(x, c, mu)
+        if thisCost == lastCost:
+            break
+
+
+
+
 def main():
-    read_csv()
+    x = read_csv('country.csv')
+    kmeans(x, 1)
 
 
 if __name__ == '__main__':
