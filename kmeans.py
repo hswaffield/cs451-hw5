@@ -3,7 +3,8 @@
 import csv
 import numpy as np
 import random
-from collections import Counter
+import matplotlib.pyplot as plt
+
 
 # lists, with an entry for each training example:
 # X[m] - each a 16d input vector
@@ -102,6 +103,7 @@ def run_random_kmeans(x, k):
     lowestCost = 9999999999999999999
     count = 0
     best_c = []
+    print('running randomized k_means, k: ', k)
     for i in range(100):
         cost, c = kmeans(x, k)
         if cost == lowestCost:
@@ -118,11 +120,37 @@ def run_random_kmeans(x, k):
 
 def main():
     x = read_csv('country.csv')
-    for k in range(1,6):
-        best_c, count, cost = run_random_kmeans(x, k)
-        print('k:', k, ' (' + str(count) + '/100)', 'cost:', cost)
+    # for k in range(1,6):
+    #     best_c, count, cost = run_random_kmeans(x, k)
+    #     print('k:', k, ' (' + str(count) + '/100)', 'cost:', cost)
+    #
+    #     print("Size of USA's cluster:", best_c.count(best_c[185]))
 
-        print("Size of USA's cluster:", best_c.count(best_c[185]))
+    num_iterations = 31
+
+    results = [run_random_kmeans(x, k) for k in range(1, num_iterations)]
+
+    # plotting results:
+    k_values = [i for i in range(1, num_iterations)]
+    costs = [results[i][2] for i in range(num_iterations - 1)]
+    centroids = [results[i][0] for i in range(num_iterations - 1)]
+
+    print(k_values)
+    print(costs)
+
+    with open('results.csv', 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=['k_values', 'costs', 'centroid'])
+        writer.writeheader()
+        for i in range(num_iterations):
+            current_row = {}
+            for j in range(3):
+                current_row['k_values'] = k_values[i]
+                current_row['costs'] = costs[i]
+                current_row['centroid'] = centroids[i]
+            writer.writerow(current_row)
+
+    plt.plot(k_values, costs, 'ro')
+    plt.show()
 
 if __name__ == '__main__':
     main()
