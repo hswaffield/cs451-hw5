@@ -2,6 +2,8 @@
 
 import csv
 import numpy as np
+import random
+from collections import Counter
 
 # lists, with an entry for each training example:
 # X[m] - each a 16d input vector
@@ -20,7 +22,7 @@ def read_csv(filename):
     return x
 
 def squared_distance(v1, v2):
-    assert (len(v1) == len(v2)), "Vectors are not the same length.\nv1: %r\nv2: %r" % (v1, v2)
+    # assert (len(v1) == len(v2)), "Vectors are not the same length.\nv1: %r\nv2: %r" % (v1, v2)
     output = 0
     for i in range(len(v1)):
         output += (v1[i] - v2[i])**2
@@ -38,10 +40,13 @@ def cost(x, c, mu):
 
 
 def kmeans(x, k):
-    mu = x[:k]
+    # mu = x[:k]
+
+    mu = random.sample(x, k=k)
+
     # print('MU: ', mu)
     lastCost = cost(x, get_centroids(x, mu), mu)
-    print(lastCost)
+    #print(lastCost)
     for iterations in range(0, 500):
         # Cluster Assignment
         c = get_centroids(x, mu)
@@ -84,11 +89,29 @@ def kmeans(x, k):
 
 
         thisCost = cost(x, c, mu)
-        print(thisCost)
+        #print(thisCost)
         if thisCost == lastCost:
-            print('converged after num iterations: ', iterations)
+            #print('converged after num iterations: ', iterations)
             break
         lastCost = thisCost
+
+    return lastCost, c
+
+
+def run_random_kmeans(x, k):
+    lowestCost = 9999999999999999999
+    count = 0
+    best_c = []
+    for i in range(100):
+        cost, c = kmeans(x, k)
+        if cost == lowestCost:
+            count += 1
+        elif cost < lowestCost:
+            lowestCost = cost
+            count = 1
+            best_c = c
+
+    return best_c, count, cost
 
 
 
@@ -96,8 +119,10 @@ def kmeans(x, k):
 def main():
     x = read_csv('country.csv')
     for k in range(1,6):
-        print('k = ', k)
-        kmeans(x, k)
+        best_c, count, cost = run_random_kmeans(x, k)
+        print('k:', k, ' (' + str(count) + '/100)', 'cost:', cost)
+
+        print("Size of USA's cluster:", best_c.count(best_c[185]))
 
 if __name__ == '__main__':
     main()
