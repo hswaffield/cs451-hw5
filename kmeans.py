@@ -39,8 +39,9 @@ def cost(x, c, mu):
 
 def kmeans(x, k):
     mu = x[:k]
-    print('MU: ', mu)
-    lastCost = 99999999999999999999  #cost(x, get_centroids(x, mu), mu)
+    # print('MU: ', mu)
+    lastCost = cost(x, get_centroids(x, mu), mu)
+    print(lastCost)
     for iterations in range(0, 500):
         # Cluster Assignment
         c = get_centroids(x, mu)
@@ -85,6 +86,7 @@ def kmeans(x, k):
         thisCost = cost(x, c, mu)
         print(thisCost)
         if thisCost == lastCost:
+            print('converged after num iterations: ', iterations)
             break
         lastCost = thisCost
 
@@ -93,8 +95,9 @@ def kmeans(x, k):
 
 def main():
     x = read_csv('country.csv')
-    kmeans(x, 1)
-
+    for k in range(1,6):
+        print('k = ', k)
+        kmeans(x, k)
 
 if __name__ == '__main__':
     main()
