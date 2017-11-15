@@ -94,7 +94,7 @@ def main():
     #     print('k:', k, '('+str(count)+'/100)', 'cost:', cost, 'Size of USA's cluster:', best_c.count(best_c[185]))
 
     # The number of k values to go through
-    max_k = 4
+    max_k = 30
 
     # Store the tuple list of results from the algorithm
     results = [run_random_kmeans(x, k) for k in range(1, max_k + 1)]
