@@ -96,16 +96,17 @@ def kmeans(x, k):
             break
         lastCost = thisCost
 
-    return lastCost, c
+    return lastCost, c, mu
 
 
 def run_random_kmeans(x, k):
     lowestCost = 9999999999999999999
     count = 0
     best_c = []
+    mu = []
     print('running randomized k_means, k: ', k)
     for i in range(100):
-        cost, c = kmeans(x, k)
+        cost, c, mu = kmeans(x, k)
         if cost == lowestCost:
             count += 1
         elif cost < lowestCost:
@@ -113,42 +114,45 @@ def run_random_kmeans(x, k):
             count = 1
             best_c = c
 
-    return best_c, count, cost
+    return best_c, count, cost, mu
 
 
 
 
 def main():
     x = read_csv('country.csv')
+
     # for k in range(1,6):
     #     best_c, count, cost = run_random_kmeans(x, k)
     #     print('k:', k, ' (' + str(count) + '/100)', 'cost:', cost)
     #
     #     print("Size of USA's cluster:", best_c.count(best_c[185]))
 
-    num_iterations = 31
+    # add 1 to the desired #num of iterations
+    num_iterations = 2
 
     results = [run_random_kmeans(x, k) for k in range(1, num_iterations)]
 
+    print(results[0])
     # plotting results:
     k_values = [i for i in range(1, num_iterations)]
     costs = [results[i][2] for i in range(num_iterations - 1)]
+    mu = [results[i][3] for i in range(num_iterations - 1)]
     centroids = [results[i][0] for i in range(num_iterations - 1)]
 
     print(k_values)
     print(costs)
 
     with open('results.csv', 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=['k_values', 'costs', 'centroid'])
+        writer = csv.DictWriter(csvfile, fieldnames=['k_values', 'costs', 'centroid', 'mu'])
         writer.writeheader()
-        for i in range(num_iterations):
+        for i in range(num_iterations - 1):
             current_row = {}
-            for j in range(3):
-                current_row['k_values'] = k_values[i]
-                current_row['costs'] = costs[i]
-                current_row['centroid'] = centroids[i]
+            current_row['k_values'] = k_values[i]
+            current_row['costs'] = costs[i]
+            current_row['centroid'] = centroids[i]
+            current_row['mu'] = mu[i]
             writer.writerow(current_row)
-
     plt.plot(k_values, costs, 'ro')
     plt.show()
 
