@@ -5,156 +5,117 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
+# X[m] - each a 16d input vector data point for a country
+# C[m] - index of the closest centroid
+# mu[k] - 16d vector, which countries correspond to the location of a centroid
 
-# lists, with an entry for each training example:
-# X[m] - each a 16d input vector
-# C[m] - a number, j, which cluster the example is closest to
-
-# mu[k] - 16d vector, which countries correspond to the cluster, K
 
 def read_csv(filename):
+    # Reads data points into a list of numpy arrays
     x = []
     with open(filename) as csvfile:
-        country_reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-        next(country_reader, None)
+        country_reader = csv.reader(csvfile, delimiter=',')
+        next(country_reader, None)  # Skipping the header
         for row in country_reader:
             row = [float(row[i]) for i in range(1, len(row))]
             x.append(np.array(row))
     return x
 
 def squared_distance(v1, v2):
-    # assert (len(v1) == len(v2)), "Vectors are not the same length.\nv1: %r\nv2: %r" % (v1, v2)
-    output = 0
-    for i in range(len(v1)):
-        output += (v1[i] - v2[i])**2
-    return output
+    return np.sum((v2 - v1)**2)
     
 def find_nearest_centroid(xi, mu):
+    # Returns the index of the closest centroid to the input data vector
     distances = [squared_distance(xi, mu[i]) for i in range(len(mu))]
     return distances.index(min(distances))
 
 def get_centroids(x, mu):
+    # Gets the index of the closest centroid for every data point in x
     return [find_nearest_centroid(x[i], mu) for i in range(len(x))]
 
 def cost(x, c, mu):
+    # Returns the kmeans algorithm cost for the current centroid assignments and locations
     return np.mean([squared_distance(x[i], mu[c[i]]) for i in range(len(x))])
 
-
 def kmeans(x, k):
-    # mu = x[:k]
-
     mu = random.sample(x, k=k)
-
-    # print('MU: ', mu)
-    lastCost = cost(x, get_centroids(x, mu), mu)
-    #print(lastCost)
+    c = []
+    # Run the kmeans algorithm, breaking out of the loop if the cost converges
+    last_cost = cost(x, get_centroids(x, mu), mu)
     for iterations in range(0, 500):
         # Cluster Assignment
         c = get_centroids(x, mu)
 
-        # Update Centroids (loops through k times:)
+        # Update Centroids
         for i in range(len(mu)):
-
-            mu_average = np.zeros((16))
+            mu_sum = np.zeros(16)
             count = 0
-
+            # Loop through the data to find the total of the points assigned to the current centroid
             for index in range(len(c)):
                 if c[index] == i:
-                    # Match:
-                    # data_assigned_to_centroid.append(x[index])
-                    mu_average = mu_average + x[index]
+                    mu_sum = mu_sum + x[index]
                     count += 1
+            # The centroid becomes the mean of all of its assigned data
+            mu[i] = (mu_sum / count)
 
-
-            # ERROR AREA
-            # updating centroids, by averaging:
-
-            # data_assigned_to_centroid = zip(data_assigned_to_centroid)
-
-            # mu_average = np.zeros(shape)
-
-            # for d in data_assigned_to_centroid:
-            #     print(d)
-            #
-            # mu = np.array([np.mean(x) for x in zip(data_assigned_to_centroid)])  # THIS LINE IS PROBABLY CAUSING THE PROBLEM
-
-            mu[i] = (mu_average / count)
-
-            # print('mu_average - after division: ', mu[i])
-
-            # print(mu[i])
-            # print(mu)
-            # print(mu[0].shape)
-
-        # Print Cost
-
-
-        thisCost = cost(x, c, mu)
-        #print(thisCost)
-        if thisCost == lastCost:
-            #print('converged after num iterations: ', iterations)
+        this_cost = cost(x, c, mu)
+        if this_cost == last_cost:
+            # The algorithm has converged
             break
-        lastCost = thisCost
+        last_cost = this_cost
 
-    return lastCost, c, mu
-
+    return last_cost, c, mu
 
 def run_random_kmeans(x, k):
-    lowestCost = 9999999999999999999
+    print('Running randomized k_means, k: ', k)
     count = 0
     best_c = []
     mu = []
-    print('running randomized k_means, k: ', k)
+    lowest_cost = kmeans(x, k)[0]
+    this_cost = 0
+    # Run kmeans 100 times, keeping track of the best cost and how many times it is generated
     for i in range(100):
-        cost, c, mu = kmeans(x, k)
-        if cost == lowestCost:
+        this_cost, c, mu = kmeans(x, k)
+        if this_cost == lowest_cost:
             count += 1
-        elif cost < lowestCost:
-            lowestCost = cost
+        elif this_cost < lowest_cost:
+            lowest_cost = this_cost
             count = 1
             best_c = c
 
-    return best_c, count, cost, mu
-
-
+    return best_c, count, this_cost, mu
 
 
 def main():
     x = read_csv('country.csv')
 
     # for k in range(1,6):
-    #     best_c, count, cost = run_random_kmeans(x, k)
-    #     print('k:', k, ' (' + str(count) + '/100)', 'cost:', cost)
-    #
-    #     print("Size of USA's cluster:", best_c.count(best_c[185]))
+    #     best_c, count, cost, mu = run_random_kmeans(x, k)
+    #     print('k:', k, '('+str(count)+'/100)', 'cost:', cost, 'Size of USA's cluster:', best_c.count(best_c[185]))
 
-    # add 1 to the desired #num of iterations
-    num_iterations = 2
+    # The number of k values to go through
+    max_k = 4
 
-    results = [run_random_kmeans(x, k) for k in range(1, num_iterations)]
+    # Store the tuple list of results from the algorithm
+    results = [run_random_kmeans(x, k) for k in range(1, max_k + 1)]
 
-    print(results[0])
-    # plotting results:
-    k_values = [i for i in range(1, num_iterations)]
-    costs = [results[i][2] for i in range(num_iterations - 1)]
-    mu = [results[i][3] for i in range(num_iterations - 1)]
-    centroids = [results[i][0] for i in range(num_iterations - 1)]
+    # Plot results:
+    k_values = [i + 1 for i in range(max_k)]
+    costs = [results[i][2] for i in range(max_k)]
+    mu = [results[i][3] for i in range(max_k)]
+    centroids = [results[i][0] for i in range(max_k)]
+    plt.plot(k_values, costs, 'ro')
 
-    print(k_values)
-    print(costs)
-
+    # Write the data to a csv file for analysis externally
     with open('results.csv', 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=['k_values', 'costs', 'centroid', 'mu'])
         writer.writeheader()
-        for i in range(num_iterations - 1):
-            current_row = {}
-            current_row['k_values'] = k_values[i]
-            current_row['costs'] = costs[i]
-            current_row['centroid'] = centroids[i]
-            current_row['mu'] = mu[i]
+        for i in range(max_k):
+            print(i)
+            current_row = {'k_values': k_values[i], 'costs': costs[i], 'centroid': centroids[i], 'mu': mu[i]}
             writer.writerow(current_row)
-    plt.plot(k_values, costs, 'ro')
     plt.show()
+
 
 if __name__ == '__main__':
     main()
